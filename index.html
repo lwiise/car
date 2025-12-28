@@ -190,9 +190,9 @@
 <!-- Top navigation (unchanged look) -->
 <div class="topnav-wrap">
   <nav class="topnav" id="mainNav">
-    <div class="pill active" data-target="sect-home">Home</div>
+    <div class="pill" data-target="sect-home">Home</div>
     <div class="pill" data-target="sect-about">About Us</div>
-    <div class="pill" data-target="sect-gallery">Gallery</div>
+    <div class="pill active" data-target="sect-gallery">Gallery</div>
     <div class="pill" data-target="sect-contact">Contacts</div>
   </nav>
 </div>
@@ -204,7 +204,7 @@
 <main class="page">
 
   <!-- HOME -->
-  <section class="section" id="sect-home">
+  <section class="section" id="sect-home" style="display:none;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center;">
       <img src="https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6931fc5eba9f9f6854a6895b_WhatsApp%20Image%202025-12-04%20at%2014.09.06_f86ae063.jpg" alt="" style="width:100%; border-radius:20px; object-fit:cover;">
       <div style="text-align:center;">
@@ -227,7 +227,7 @@
   </section>
 
   <!-- GALLERY -->
-  <section class="section" id="sect-gallery" style="display:none;">
+  <section class="section" id="sect-gallery">
     <!-- Filter bar (will be hidden in solo via body.is-solo) -->
     <header class="shop-head">
       <div class="filter-row">
@@ -397,7 +397,8 @@ function calcFilterBarHeight(){
 /* =================== SECTION SWITCH =================== */
 let rrTimer = null;   // defined here so we can clear it
 
-window.switchSection = function(id){
+window.switchSection = function(id, opts = {}){
+  const { skipScroll = false } = opts;
   // leave solo state if switching
   document.body.classList.remove("is-solo");
   setMapExtra(0);
@@ -417,15 +418,17 @@ window.switchSection = function(id){
   setActivePill(id);
 
   // scroll so content starts below map
-  window.scrollTo({
-    top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
-    behavior:'smooth'
-  });
+  if(!skipScroll){
+    window.scrollTo({
+      top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+      behavior:'smooth'
+    });
+  }
 };
 
 /* top nav events */
 nav.querySelectorAll('.pill').forEach(pill=>{
-  pill.addEventListener('click', ()=> switchSection(pill.dataset.target));
+  pill.addEventListener('click', ()=> switchSection(pill.dataset.target, { skipScroll:true }));
 });
 
 /* =================== GALLERY RENDER =================== */
@@ -620,7 +623,7 @@ document.getElementById('artistModal').addEventListener('click', e=>{
 });
 
 /* default section = Gallery */
-switchSection('sect-home');
+switchSection('sect-gallery', { skipScroll:true });
 </script>
 </body>
 </html>

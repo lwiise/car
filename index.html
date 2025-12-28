@@ -12,6 +12,7 @@
     --accent:#333;
     --card-radius:32px;
     --btn-radius:30px;
+    --map-height:40vh;
     /* extra height the map receives when the filter bar is hidden in solo mode */
     --map-extra:0px;
   }
@@ -49,10 +50,10 @@
   .topnav .pill:hover{ opacity:1; }
   .topnav .pill.active{ background:rgba(255,255,255,0.18); }
 
-  /* =========== Map (fixed 40vh) =========== */
+  /* =========== Map (40% viewport height) =========== */
   #map{
     width:100%;
-    height: 40vh;              /* <-- no extra height anymore */
+    height: var(--map-height); /* <-- no extra height anymore */
     position:relative;
     background:#000;
     /* black & white look */
@@ -189,9 +190,9 @@
 <!-- Top navigation (unchanged look) -->
 <div class="topnav-wrap">
   <nav class="topnav" id="mainNav">
-    <div class="pill" data-target="sect-home">Home</div>
+    <div class="pill active" data-target="sect-home">Home</div>
     <div class="pill" data-target="sect-about">About Us</div>
-    <div class="pill active" data-target="sect-gallery">Gallery</div>
+    <div class="pill" data-target="sect-gallery">Gallery</div>
     <div class="pill" data-target="sect-contact">Contacts</div>
   </nav>
 </div>
@@ -203,7 +204,7 @@
 <main class="page">
 
   <!-- HOME -->
-  <section class="section" id="sect-home" style="display:none;">
+  <section class="section" id="sect-home">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center;">
       <img src="https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6931fc5eba9f9f6854a6895b_WhatsApp%20Image%202025-12-04%20at%2014.09.06_f86ae063.jpg" alt="" style="width:100%; border-radius:20px; object-fit:cover;">
       <div style="text-align:center;">
@@ -226,7 +227,7 @@
   </section>
 
   <!-- GALLERY -->
-  <section class="section" id="sect-gallery">
+  <section class="section" id="sect-gallery" style="display:none;">
     <!-- Filter bar (will be hidden in solo via body.is-solo) -->
     <header class="shop-head">
       <div class="filter-row">
@@ -619,7 +620,7 @@ document.getElementById('artistModal').addEventListener('click', e=>{
 });
 
 /* default section = Gallery */
-switchSection('sect-gallery');
+switchSection('sect-home');
 </script>
 </body>
 </html>

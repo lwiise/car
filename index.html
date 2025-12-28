@@ -271,13 +271,13 @@
 
         <!-- RIGHT -->
         <div>
-          <h2 class="solo-title" id="soloTitle">RANGE ROVER CONCEPT 01</h2>
+          <h2 class="solo-title" id="soloTitle">TOWER CONCEPT 01</h2>
           <p class="solo-sub">Contemporary automotive sculpture with a functional soul.</p>
 
           <div class="specs">
             <div class="spec"><h5>Material</h5><div id="spMat">Concept Finish</div></div>
             <div class="spec"><h5>Dimensions</h5><div id="spDim">Full-size SUV</div></div>
-            <div class="spec"><h5>Location</h5><div id="soloStore">Range Rover Studio, London</div></div>
+            <div class="spec"><h5>Location</h5><div id="soloStore">Tower Studio, London</div></div>
           </div>
 
           <div class="artist" id="artistCard">
@@ -388,7 +388,7 @@ const baseCar = {
   video360: BASE_VIDEO,
   model: "https://raw.githubusercontent.com/lwiise/3d-models/main/compressed_1764713978813_range%20rover%203d%20model%20(1).glb",
   specs: { mat: "Concept Finish", dim: "Full-size SUV" },
-  store: { name: "Range Rover Studio, London", coords: [-0.1276, 51.5072] },
+  store: { name: "Tower Studio, London", coords: [-0.1276, 51.5072] },
   artist: {
     name: "Finna Studio",
     role: "Automotive Concept",
@@ -398,7 +398,7 @@ const baseCar = {
 };
 
 const PRODUCTS = Array.from({length:8}, (_,i)=>{
-  const base = { id:`range-rover-${i+1}`, name:`Range Rover Concept 0${i+1}`, ...baseCar };
+  const base = { id:`tower-${i+1}`, name:`Tower Concept 0${i+1}`, ...baseCar };
   const cover = COVER_IMAGES[i] || base.img;
   return { ...base, img: cover, galleryImages:[cover] };
 });

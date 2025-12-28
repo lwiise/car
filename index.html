@@ -82,28 +82,29 @@
   .shop-head{
     position:sticky; top:0;
     background:#fff; z-index:10;
-    padding: 12px 0 16px;
+    padding: 8px 0 18px;
     border-bottom:none;
   }
-  .filter-row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .filter-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .chip{
     border:none;
-    background:#f7f7f7;
+    background:#f4f4f4;
     color:#7a7a7a;
     font-weight:800;
-    padding:10px 20px;
+    padding:8px 16px;
     border-radius:999px;
     cursor:pointer;
-    font-size:11px;
+    font-size:10px;
     letter-spacing:.08em;
     text-transform:uppercase;
-    box-shadow:0 8px 16px rgba(0,0,0,0.08);
+    box-shadow:none;
     transition:background .2s ease, color .2s ease, box-shadow .2s ease;
   }
+  .chip:hover{ background:#efefef; }
   .chip.active{
     background:#111;
     color:#fff;
-    box-shadow:0 12px 24px rgba(0,0,0,0.24);
+    box-shadow:0 6px 14px rgba(0,0,0,0.18);
   }
 
   /* Hide the filter bar only while in solo view */

@@ -365,6 +365,16 @@ const BASE_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/Vide
 const SPECIAL_360_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/D_Car_Studio_Video_Generation.mp4";
 const SPECIAL_NORMAL_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/Untitled%20video%20-%20Made%20with%20Clipchamp%20(9).mp4";
 const SPECIAL_IMG = "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/69318e85e54ec217dd718990_ChatGPT%20Image%20Dec%203%2C%202025%2C%2005_23_33%20PM.png";
+const COVER_IMAGES = [
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c6cf22527a26fd2007_Gemini_Generated_Image_tvspprtvspprtvsp.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c509850f48d7f8c54c_Gemini_Generated_Image_sqilmvsqilmvsqil.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c535f4066b9e65d704_Gemini_Generated_Image_glh30cglh30cglh3.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c4c0654bff37f62202_Gemini_Generated_Image_8zdjot8zdjot8zdj.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c35aa4e76b57119ba6_Gemini_Generated_Image_oo0o83oo0o83oo0o.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c2101e496079b1332b_Gemini_Generated_Image_gmpt40gmpt40gmpt.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c1829b5e2731725a40_Gemini_Generated_Image_5bjix25bjix25bji.png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c029e929857a15f190_Gemini_Generated_Image_xfrvpjxfrvpjxfrv.png"
+];
 
 const baseCar = {
   category: "decor",
@@ -387,12 +397,10 @@ const baseCar = {
   }
 };
 
-const PRODUCTS = Array.from({length:12}, (_,i)=>{
+const PRODUCTS = Array.from({length:8}, (_,i)=>{
   const base = { id:`range-rover-${i+1}`, name:`Range Rover Concept 0${i+1}`, ...baseCar };
-  if(i===1){
-    return { ...base, img: SPECIAL_IMG, galleryImages:[SPECIAL_IMG], video: SPECIAL_NORMAL_VIDEO, video360: SPECIAL_360_VIDEO };
-  }
-  return base;
+  const cover = COVER_IMAGES[i] || base.img;
+  return { ...base, img: cover, galleryImages:[cover] };
 });
 
 /* =================== STATE + HELPERS =================== */

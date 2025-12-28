@@ -122,6 +122,8 @@
     border-radius:18px; overflow:hidden; background:#fafafa;
   }
   .card-media img{ width:100%; height:100%; object-fit:cover; }
+  .card-logo .card-media{ background:#fff; padding:18px; }
+  .card-logo .card-media img{ object-fit:contain; }
   .card-name{ font-size:12px; font-weight:900; color:#919191; letter-spacing:.08em; text-transform:uppercase; }
   .card-sub{ font-size:10px; color:#c7c7c7; text-transform:uppercase; }
 
@@ -375,9 +377,17 @@ const COVER_IMAGES = [
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c1829b5e2731725a40_Gemini_Generated_Image_5bjix25bjix25bji.png",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c029e929857a15f190_Gemini_Generated_Image_xfrvpjxfrvpjxfrv.png"
 ];
+const DEVELOPER_LOGOS = [
+  "https://logo.clearbit.com/github.com",
+  "https://logo.clearbit.com/gitlab.com",
+  "https://logo.clearbit.com/vercel.com",
+  "https://logo.clearbit.com/netlify.com",
+  "https://logo.clearbit.com/figma.com",
+  "https://logo.clearbit.com/stackoverflow.com"
+];
 
 const baseCar = {
-  category: "decor",
+  category: "projects",
   img: "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a596ee0b96ed1489b_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(7).png",
   galleryImages: [
     "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a596ee0b96ed1489b_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(7).png",
@@ -397,11 +407,44 @@ const baseCar = {
   }
 };
 
-const PRODUCTS = Array.from({length:8}, (_,i)=>{
+function makeDeveloper(name, logo){
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  return {
+    id: `dev-${slug}`,
+    name,
+    category: "developers",
+    img: logo,
+    galleryImages: [logo],
+    video: BASE_VIDEO,
+    video360: BASE_VIDEO,
+    model: baseCar.model,
+    specs: { mat: "Brand Identity", dim: "Developer Partner" },
+    store: { name: "Developer Hub", coords: [45.0792, 23.8859] },
+    artist: {
+      name,
+      role: "Developer Platform",
+      img: logo,
+      bio: `${name} tools and services for modern teams.`
+    }
+  };
+}
+
+const PROJECTS = Array.from({length:8}, (_,i)=>{
   const base = { id:`tower-${i+1}`, name:`Tower Concept 0${i+1}`, ...baseCar };
   const cover = COVER_IMAGES[i] || base.img;
   return { ...base, img: cover, galleryImages:[cover] };
 });
+
+const DEVELOPERS = [
+  makeDeveloper("GitHub", DEVELOPER_LOGOS[0]),
+  makeDeveloper("GitLab", DEVELOPER_LOGOS[1]),
+  makeDeveloper("Vercel", DEVELOPER_LOGOS[2]),
+  makeDeveloper("Netlify", DEVELOPER_LOGOS[3]),
+  makeDeveloper("Figma", DEVELOPER_LOGOS[4]),
+  makeDeveloper("Stack Overflow", DEVELOPER_LOGOS[5])
+];
+
+const PRODUCTS = [...PROJECTS, ...DEVELOPERS];
 
 /* =================== STATE + HELPERS =================== */
 const nav = document.getElementById('mainNav');
@@ -459,7 +502,7 @@ nav.querySelectorAll('.pill').forEach(pill=>{
 const grid = document.getElementById('grid');
 function card(p){
   const el = document.createElement('article');
-  el.className = 'card';
+  el.className = p.category === 'developers' ? 'card card-logo' : 'card';
   el.innerHTML = `
     <div class="card-media"><img src="${p.img}" alt="${p.name}"></div>
     <div class="card-name">${p.name}</div>

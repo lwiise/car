@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EZ — Gallery</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fff;
+    --text-main:#222;
+    --accent:#333;
+    --card-radius:32px;
+    --btn-radius:30px;
+    /* extra height the map receives when the filter bar is hidden in solo mode */
+    --map-extra:0px;
+  }
+
+  /* =========== Base =========== */
+  *,*::before,*::after{ box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  body{
+    margin:0; background:var(--bg); color:var(--text-main);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  a{ color:inherit; text-decoration:none; }
+
+  /* Make Mapbox attribution/logo small & subtle */
+  .mapboxgl-ctrl-bottom-left,
+  .mapboxgl-ctrl-bottom-right{
+    transform:scale(.6);
+    transform-origin:bottom right;
+    opacity:.35;
+  }
+
+  /* =========== Top Nav (unchanged look) =========== */
+  .topnav-wrap{
+    position:fixed; inset: 14px 0 auto 0; display:flex; justify-content:center; z-index:50; pointer-events:none;
+  }
+  .topnav{
+    pointer-events:auto;
+    display:flex; gap:22px; align-items:center; padding:12px 22px;
+    background:rgba(0,0,0,0.6); color:#fff; border-radius:999px; backdrop-filter:blur(10px);
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  }
+  .topnav .pill{
+    font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+    opacity:.85; padding:9px 14px; border-radius:12px; transition:.2s ease; cursor:pointer;
+  }
+  .topnav .pill:hover{ opacity:1; }
+  .topnav .pill.active{ background:rgba(255,255,255,0.18); }
+
+  /* =========== Map (fixed 40vh) =========== */
+  #map{
+    width:100%;
+    height: 40vh;              /* <-- no extra height anymore */
+    position:relative;
+    background:#000;
+    /* black & white look */
+    filter:grayscale(1) contrast(1.08);
+  }
+
+  /* Sticky map only in solo mode */
+  body.is-solo #map{
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+
+  /* =========== Sections wrapper =========== */
+  .page{
+    display:block; width:100%; overflow-x:hidden;
+  }
+
+  .section{
+    width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 24px 24px 60px;
+  }
+
+  /* =========== GALLERY FILTER BAR (unchanged) =========== */
+  .shop-head{
+    position:sticky; top:0;
+    background:#fff; z-index:10;
+    padding: 18px 24px;
+    border-bottom:1px solid #f0f0f0;
+  }
+  .filter-row{ display:flex; gap:10px; align-items:center; }
+  .chip{
+    border:none; background:#f5f5f5; color:#666; font-weight:700;
+    padding:10px 18px; border-radius:999px; cursor:pointer; font-size:12px;
+  }
+  .chip.active{ background:#111; color:#fff; }
+
+  /* Hide the filter bar only while in solo view */
+  body.is-solo .shop-head{ display:none; }
+
+  /* =========== GRID CARDS (unchanged) =========== */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:24px; }
+  .card{
+    background:#fff; border:1px solid #f3f3f3; border-radius:24px; padding:18px;
+    cursor:pointer; transition:.25s cubic-bezier(.25,.8,.25,1); text-align:center;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 14px 35px rgba(0,0,0,0.07); }
+  .card-media{
+    height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:12px;
+    border-radius:18px; overflow:hidden; background:#fafafa;
+  }
+  .card-media img{ width:100%; height:100%; object-fit:cover; }
+  .card-name{ font-size:12px; font-weight:900; color:#919191; letter-spacing:.08em; text-transform:uppercase; }
+  .card-sub{ font-size:10px; color:#c7c7c7; text-transform:uppercase; }
+
+  /* =========== SOLO VIEW (product) LEFT/RIGHT =========== */
+  .solo{
+    display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+    gap:32px; align-items:start;
+    background:#fff; border-radius:28px; border:1px solid #eee; padding:24px; box-shadow:0 12px 28px rgba(0,0,0,0.06);
+  }
+  .media-panels{
+    background:#0b0b0b; border-radius:20px; padding:16px; color:#fff;
+  }
+  .mode-tabs{ display:flex; gap:10px; margin-bottom:10px; }
+  .mode-btn{
+    background:#2a2a2a; border:none; color:#fff; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    font-size:11px; border-radius:999px; padding:9px 14px; cursor:pointer; opacity:.85; transition:.2s;
+  }
+  .mode-btn.active, .mode-btn:hover{ opacity:1; background:#3a3a3a; }
+  .media-stage{
+    position:relative; height:min(56vh, 520px); border-radius:16px; overflow:hidden; background:#000;
+  }
+  .media-stage img, .media-stage video, .media-stage model-viewer{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .solo-title{ margin:0 0 6px; font-size:28px; font-weight:900; letter-spacing:-.01em; }
+  .solo-sub{ margin:0 0 18px; color:#666; }
+  .specs{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin:18px 0 22px; }
+  .spec h5{ margin:0 0 6px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#999; }
+  .spec div{ font-size:14px; font-weight:800; }
+
+  .artist{
+    display:flex; align-items:center; gap:14px; padding:14px; border-radius:16px; background:#f7f7f7; border:1px solid #eee;
+  }
+  .avatar{ width:46px; height:46px; border-radius:50%; overflow:hidden; background:#eaeaea; }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .artist-name{ font-weight:800; font-size:14px; }
+  .artist-role{ color:#888; font-size:12px; }
+  .artist-cta{ margin-left:auto; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#222; }
+
+  .solo-actions{ display:flex; gap:10px; margin-top:14px; }
+  .btn{ padding:12px 16px; border:none; border-radius:12px; font-weight:800; cursor:pointer; }
+  .btn-dark{ background:#111; color:#fff; }
+  .btn-light{ background:#efefef; color:#444; }
+
+  .back-row{ margin-top:18px; }
+  .link-back{ display:inline-flex; align-items:center; gap:8px; font-weight:800; color:#666; }
+
+  /* ======== 360 custom control (unchanged) ======== */
+  .video360-shell{ height:100%; display:flex; flex-direction:column; }
+  .video360-main{ flex:1; width:100%; height:calc(100% - 40px); object-fit:cover; }
+  .video360-bar{ display:flex; align-items:center; gap:10px; padding:6px 12px 10px; background:#2f2f2f; }
+  .video360-play{
+    width:26px; height:26px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:transparent; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer;
+  }
+  .video360-range{ -webkit-appearance:none; appearance:none; width:100%; height:18px; border-radius:999px; background:#121212; }
+  .video360-range::-webkit-slider-thumb{ -webkit-appearance:none; width:52px; height:18px; border:none; border-radius:999px; background:#f5f5f5; }
+  .video360-range::-moz-range-thumb{ width:52px; height:18px; border:none; border-radius:999px; background:#f5f5f5; }
+
+  /* ======== Modal quick style (kept minimal) ======== */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:99; }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{ width:min(420px, 92vw); background:#fff; border-radius:20px; padding:24px; box-shadow:0 20px 40px rgba(0,0,0,.22); }
+  .modal-close{ position:absolute; top:16px; right:18px; background:none; border:none; font-size:20px; color:#888; cursor:pointer; }
+  .modal-header{ text-align:center; margin-bottom:14px; }
+  .modal-avatar{ width:84px; height:84px; border-radius:50%; overflow:hidden; margin: 0 auto 12px; }
+  .modal-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .modal-sub{ font-size:12px; color:#999; text-transform:uppercase; letter-spacing:.08em; }
+
+  @media (max-width: 980px){
+    .solo{ grid-template-columns: 1fr; }
+    .media-stage{ height: 52vh; }
+    .specs{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 620px){
+    .specs{ grid-template-columns: 1fr; }
+  }
+
+</style>
+</head>
+<body>
+<!-- Top navigation (unchanged look) -->
+<div class="topnav-wrap">
+  <nav class="topnav" id="mainNav">
+    <div class="pill" data-target="sect-home">Home</div>
+    <div class="pill" data-target="sect-about">About Us</div>
+    <div class="pill active" data-target="sect-gallery">Gallery</div>
+    <div class="pill" data-target="sect-contact">Contacts</div>
+  </nav>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- PAGE -->
+<main class="page">
+
+  <!-- HOME -->
+  <section class="section" id="sect-home" style="display:none;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center;">
+      <img src="https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6931fc5eba9f9f6854a6895b_WhatsApp%20Image%202025-12-04%20at%2014.09.06_f86ae063.jpg" alt="" style="width:100%; border-radius:20px; object-fit:cover;">
+      <div style="text-align:center;">
+        <h1 style="margin:0 0 10px; font-size:42px; letter-spacing:-.02em;">Welcome to EZ</h1>
+        <p style="margin:0 0 18px; color:#666;">Discover conceptual automotive art in a gallery-inspired experience.</p>
+        <button class="btn btn-dark" onclick="switchSection('sect-gallery')">Explore Collection</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="sect-about" style="display:none;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center;">
+      <div style="text-align:center;">
+        <h2 style="margin:0 0 10px; font-size:36px; letter-spacing:-.02em;">About Us</h2>
+        <p style="margin:0; color:#666;">EZ experiments at the intersection of architecture and automotive design, turning cars into sculptural objects.</p>
+      </div>
+      <img src="https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692983ee9846cdba2bc9ce5a_WhatsApp%20Image%202025-11-27%20at%2015.02.52_aec85640.jpg" alt="Studio" style="width:100%; border-radius:20px; object-fit:cover;">
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="section" id="sect-gallery">
+    <!-- Filter bar (will be hidden in solo via body.is-solo) -->
+    <header class="shop-head">
+      <div class="filter-row">
+        <button class="chip active" data-filter="all" id="chipAll">ALL</button>
+        <button class="chip" data-filter="decor">Cars</button>
+      </div>
+    </header>
+
+    <!-- Grid -->
+    <div class="grid" id="grid"></div>
+
+    <!-- SOLO (product) -->
+    <div id="soloBlock" style="display:none; margin-top:18px;">
+      <div class="solo">
+        <!-- LEFT -->
+        <div class="media-panels">
+          <div class="mode-tabs">
+            <button class="mode-btn active" data-mode="images">Images</button>
+            <button class="mode-btn" data-mode="360">360</button>
+            <button class="mode-btn" data-mode="video">Video</button>
+            <button class="mode-btn" data-mode="3d">3D</button>
+          </div>
+          <div class="media-stage" id="mediaStage"></div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <h2 class="solo-title" id="soloTitle">RANGE ROVER CONCEPT 01</h2>
+          <p class="solo-sub">Contemporary automotive sculpture with a functional soul.</p>
+
+          <div class="specs">
+            <div class="spec"><h5>Material</h5><div id="spMat">Concept Finish</div></div>
+            <div class="spec"><h5>Dimensions</h5><div id="spDim">Full-size SUV</div></div>
+            <div class="spec"><h5>Location</h5><div id="soloStore">Range Rover Studio, London</div></div>
+          </div>
+
+          <div class="artist" id="artistCard">
+            <div class="avatar"><img id="artistImg" src="" alt=""></div>
+            <div>
+              <div class="artist-name" id="artistName">Finna Studio</div>
+              <div class="artist-role" id="artistRole">Automotive Concept</div>
+            </div>
+            <div class="artist-cta" id="openArtist">View Bio →</div>
+          </div>
+
+          <div class="solo-actions">
+            <button class="btn btn-dark" id="btnContact">Contact</button>
+            <button class="btn btn-light" id="btnClose">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="back-row">
+        <a class="link-back" id="btnBack">← Back to Collection</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="sect-contact" style="display:none;">
+    <h2 style="margin:0 0 12px;">Get in Touch</h2>
+    <p style="margin:0 0 16px; color:#666;">Interested in this concept car? Reach out and let's talk.</p>
+    <form action="https://formsubmit.co/anaskaroti@gmail.com" method="POST" style="max-width:520px;">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <div style="display:grid; gap:12px;">
+        <input required name="name" placeholder="Your Name" style="padding:12px 14px; border:1px solid #eee; border-radius:12px;">
+        <input required name="email" type="email" placeholder="Your Email" style="padding:12px 14px; border:1px solid #eee; border-radius:12px;">
+        <input name="subject" id="formSubject" placeholder="Subject" style="padding:12px 14px; border:1px solid #eee; border-radius:12px;">
+        <textarea name="message" rows="3" placeholder="Message..." style="padding:12px 14px; border:1px solid #eee; border-radius:12px;"></textarea>
+        <button class="btn btn-dark" type="submit">Send Inquiry</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<!-- Artist Modal -->
+<div class="modal-overlay" id="artistModal">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-close" id="closeArtistModal">×</button>
+    <div class="modal-header">
+      <div class="modal-avatar"><img id="modalArtistImg" src="" alt=""></div>
+      <h3 id="modalArtistName" style="margin:0;"></h3>
+      <div class="modal-sub" id="modalArtistRole"></div>
+    </div>
+    <p id="modalArtistBio" style="margin:0; color:#555; line-height:1.6;"></p>
+  </div>
+</div>
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+<script>
+/* =================== MAP =================== */
+const MAPBOX_TOKEN = "pk.eyJ1IjoiYW5hc2thcm90aSIsImEiOiJjbWhqcHgwcmMwbWM0MmxwZ2V5Z2x5OTN0In0.bpOf-4BsljExZdYZUak_pw";
+const USER_STYLE  = "mapbox://styles/anaskaroti/cmhuiic1f00ft01qucn91gk6e";
+mapboxgl.accessToken = MAPBOX_TOKEN;
+
+const map = new mapboxgl.Map({
+  container:"map",
+  style: USER_STYLE,
+  center:[0,20],
+  zoom:0.8,
+  pitch:0,
+  projection:'globe'
+});
+map.on('style.load', ()=>{
+  try{
+    map.setFog({
+      color:'rgb(255,255,255)',
+      'high-color':'rgb(200,200,200)',
+      'space-color':'rgb(0,0,0)',
+      'star-intensity':0.6
+    });
+  }catch(_){}
+});
+
+/* =================== DATA =================== */
+const BASE_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/Video_Generation_Without_Logo%20(1).mp4";
+const SPECIAL_360_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/D_Car_Studio_Video_Generation.mp4";
+const SPECIAL_NORMAL_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/Untitled%20video%20-%20Made%20with%20Clipchamp%20(9).mp4";
+const SPECIAL_IMG = "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/69318e85e54ec217dd718990_ChatGPT%20Image%20Dec%203%2C%202025%2C%2005_23_33%20PM.png";
+
+const baseCar = {
+  category: "decor",
+  img: "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a596ee0b96ed1489b_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(7).png",
+  galleryImages: [
+    "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a596ee0b96ed1489b_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(7).png",
+    "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a4b2d8f0b234818b1_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(1).png",
+    "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/692f5e9a7b3355444dfdad28_Gemini_Generated_Image_r5gp3jr5gp3jr5gp%20(3).png"
+  ],
+  video: BASE_VIDEO,
+  video360: BASE_VIDEO,
+  model: "https://raw.githubusercontent.com/lwiise/3d-models/main/compressed_1764713978813_range%20rover%203d%20model%20(1).glb",
+  specs: { mat: "Concept Finish", dim: "Full-size SUV" },
+  store: { name: "Range Rover Studio, London", coords: [-0.1276, 51.5072] },
+  artist: {
+    name: "Finna Studio",
+    role: "Automotive Concept",
+    img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80",
+    bio: "A luxury SUV concept blending architectural forms with automotive design."
+  }
+};
+
+const PRODUCTS = Array.from({length:12}, (_,i)=>{
+  const base = { id:`range-rover-${i+1}`, name:`Range Rover Concept 0${i+1}`, ...baseCar };
+  if(i===1){
+    return { ...base, img: SPECIAL_IMG, galleryImages:[SPECIAL_IMG], video: SPECIAL_NORMAL_VIDEO, video360: SPECIAL_360_VIDEO };
+  }
+  return base;
+});
+
+/* =================== STATE + HELPERS =================== */
+const nav = document.getElementById('mainNav');
+function setActivePill(id){
+  nav.querySelectorAll('.pill').forEach(p=>{
+    p.classList.toggle('active', p.dataset.target === id);
+  });
+}
+function setMapExtra(px){
+  document.documentElement.style.setProperty('--map-extra', (px||0)+'px');
+}
+function calcFilterBarHeight(){
+  const sh = document.querySelector('#sect-gallery .shop-head');
+  return sh ? sh.offsetHeight : 0;
+}
+
+/* =================== SECTION SWITCH =================== */
+let rrTimer = null;   // defined here so we can clear it
+
+window.switchSection = function(id){
+  // leave solo state if switching
+  document.body.classList.remove("is-solo");
+  setMapExtra(0);
+
+  // hide solo view and ALWAYS re-show the grid
+  document.getElementById("soloBlock").style.display = "none";
+  const gridEl = document.getElementById("grid");
+  if(gridEl) gridEl.style.display = "grid";
+
+  // stop image autoplay if running
+  if(rrTimer){ clearInterval(rrTimer); rrTimer = null; }
+
+  ["sect-home","sect-about","sect-gallery","sect-contact"].forEach(s=>{
+    const node = document.getElementById(s);
+    if(node) node.style.display = (s===id) ? "block" : "none";
+  });
+  setActivePill(id);
+
+  // scroll so content starts below map
+  window.scrollTo({
+    top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+    behavior:'smooth'
+  });
+};
+
+/* top nav events */
+nav.querySelectorAll('.pill').forEach(pill=>{
+  pill.addEventListener('click', ()=> switchSection(pill.dataset.target));
+});
+
+/* =================== GALLERY RENDER =================== */
+const grid = document.getElementById('grid');
+function card(p){
+  const el = document.createElement('article');
+  el.className = 'card';
+  el.innerHTML = `
+    <div class="card-media"><img src="${p.img}" alt="${p.name}"></div>
+    <div class="card-name">${p.name}</div>
+    <div class="card-sub">Concept Car</div>
+  `;
+  el.addEventListener('click', ()=> openSolo(p));
+  return el;
+}
+function render(list){
+  grid.innerHTML = '';
+  list.forEach(p=> grid.appendChild(card(p)));
+}
+render(PRODUCTS);
+
+/* filters */
+document.querySelector('.shop-head')?.addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  document.querySelectorAll('.chip').forEach(c=> c.classList.remove('active'));
+  btn.classList.add('active');
+  const f = btn.dataset.filter;
+  render( f==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.category===f) );
+});
+
+/* =================== SOLO VIEW (product) =================== */
+const soloBlock  = document.getElementById('soloBlock');
+const mediaStage = document.getElementById('mediaStage');
+let rrMode = 'images';
+let rrImages = [];
+let rrIndex  = 0;
+
+function encodeURL(url){
+  return (url||'').replace(/\(/g,'%28').replace(/\)/g,'%29').replace(/ /g,'%20');
+}
+
+function rrStart(){
+  if(!rrImages.length) return;
+  if(rrTimer) clearInterval(rrTimer);
+  rrTimer = setInterval(()=> rrGo(rrIndex+1), 4000);
+}
+function rrGo(next){
+  if(rrMode!=='images' || !rrImages.length) return;
+  const max = rrImages.length;
+  rrIndex = ((next%max)+max)%max;
+  const img = mediaStage.querySelector('img[data-rr]');
+  if(img) img.src = rrImages[rrIndex];
+}
+
+function setMode(mode, product){
+  rrMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.mode===mode);
+  });
+
+  // stop auto when not in images
+  if(rrTimer){ clearInterval(rrTimer); rrTimer=null; }
+
+  if(mode==='images'){
+    mediaStage.innerHTML = `<img data-rr src="${rrImages[0]}" alt="${product.name}"/>`;
+    rrStart();
+    return;
+  }
+
+  if(mode==='video'){
+    mediaStage.innerHTML = `
+      <video autoplay loop muted playsinline controls>
+        <source src="${encodeURL(product.video)}" type="video/mp4">
+      </video>
+    `;
+    return;
+  }
+
+  if(mode==='360'){
+    mediaStage.innerHTML = `
+      <div class="video360-shell">
+        <video id="rr360Video" class="video360-main" muted playsinline autoplay>
+          <source src="${encodeURL(product.video360 || product.video)}" type="video/mp4">
+        </video>
+        <div class="video360-bar">
+          <button class="video360-play" id="rr360PlayBtn">❚❚</button>
+          <input type="range" id="rr360Range" class="video360-range" min="0" max="100" step="0.1" value="0">
+        </div>
+      </div>
+    `;
+    const v = document.getElementById('rr360Video');
+    const b = document.getElementById('rr360PlayBtn');
+    const r = document.getElementById('rr360Range');
+    v?.addEventListener('loadedmetadata', ()=>{ v.currentTime=0; v.play().catch(()=>{}); });
+    v?.addEventListener('timeupdate', ()=>{ if(v.duration){ r.value = (v.currentTime/v.duration)*100; } });
+    r?.addEventListener('input', ()=>{ if(v.duration){ v.currentTime = (parseFloat(r.value||'0')/100)*v.duration; v.pause(); } });
+    b?.addEventListener('click', ()=>{ if(v.paused){ v.play().catch(()=>{});} else { v.pause(); } });
+    v?.addEventListener('play', ()=> b.textContent='❚❚');
+    v?.addEventListener('pause',()=> b.textContent='▶');
+    return;
+  }
+
+  if(mode==='3d'){
+    mediaStage.innerHTML = `
+      <model-viewer src="${encodeURL(product.model)}"
+        camera-controls auto-rotate shadow-intensity="1"
+        style="width:100%;height:100%; background:#ffffff;" camera-orbit="45deg 75deg 3m" environment-image="neutral">
+      </model-viewer>
+    `;
+  }
+}
+
+function setupMedia(p){
+  rrImages = (p.galleryImages && p.galleryImages.length) ? p.galleryImages : [p.img];
+  rrIndex  = 0;
+  setMode('images', p);
+
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    btn.onclick = ()=> setMode(btn.dataset.mode, p);
+  });
+}
+
+function gotoStore(store){
+  if(!store) return;
+  map.flyTo({ center:store.coords, zoom:16.2, pitch:65, bearing:45, duration:6000 });
+}
+
+function openSolo(p){
+  // fill text
+  document.getElementById('soloTitle').textContent = p.name;
+  document.getElementById('spMat').textContent     = p.specs.mat;
+  document.getElementById('spDim').textContent     = p.specs.dim;
+  document.getElementById('soloStore').textContent = p.store.name;
+
+  document.getElementById('artistName').textContent = p.artist.name;
+  document.getElementById('artistRole').textContent = p.artist.role;
+  document.getElementById('artistImg').src         = p.artist.img;
+
+  document.getElementById('modalArtistName').textContent = p.artist.name;
+  document.getElementById('modalArtistRole').textContent = p.artist.role;
+  document.getElementById('modalArtistImg').src          = p.artist.img;
+  document.getElementById('modalArtistBio').textContent  = p.artist.bio;
+
+  setupMedia(p);
+  gotoStore(p.store);
+
+  // show solo; hide grid
+  document.getElementById('grid').style.display = 'none';
+  soloBlock.style.display = 'block';
+
+  // SOLO MODE: hide filter bar + (now) no extra height for map
+  const extra = calcFilterBarHeight();
+  setMapExtra(extra); // harmless now, since #map ignores --map-extra
+  document.body.classList.add('is-solo');
+
+  // scroll so solo starts right under map
+  window.scrollTo({
+    top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+    behavior:'smooth'
+  });
+
+  // wire buttons
+  document.getElementById('btnClose').onclick = closeSolo;
+  document.getElementById('btnBack').onclick  = closeSolo;
+  document.getElementById('btnContact').onclick = ()=> switchSection('sect-contact');
+  document.getElementById('openArtist').onclick = ()=> document.getElementById('artistModal').classList.add('open');
+}
+
+function closeSolo(){
+  soloBlock.style.display = 'none';
+  document.getElementById('grid').style.display = 'grid';
+
+  // leave sticky mode, reset map height var (no visual effect now)
+  document.body.classList.remove('is-solo');
+  setMapExtra(0);
+
+  // stop autoplay
+  if(rrTimer){ clearInterval(rrTimer); rrTimer = null; }
+
+  // scroll back to gallery head
+  window.scrollTo({
+    top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+    behavior:'smooth'
+  });
+}
+
+/* modal close */
+document.getElementById('closeArtistModal').addEventListener('click', ()=> document.getElementById('artistModal').classList.remove('open'));
+document.getElementById('artistModal').addEventListener('click', e=>{
+  if(e.target.id==='artistModal') e.currentTarget.classList.remove('open');
+});
+
+/* default section = Gallery */
+switchSection('sect-gallery');
+</script>
+</body>
+</html>

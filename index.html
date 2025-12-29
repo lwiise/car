@@ -88,7 +88,7 @@
   }
   body.is-solo #soloBlock{
     margin-top:0;
-    height:calc(100vh - var(--map-height));
+    min-height:calc(100vh - var(--map-height));
     display:flex;
     flex-direction:column;
   }
@@ -97,15 +97,6 @@
   }
   body.is-solo #soloBlock .solo{
     flex:1;
-    height:100%;
-    min-height:0;
-    overflow:hidden;
-  }
-  body.is-solo #soloBlock .solo > div{
-    min-height:0;
-  }
-  body.is-solo #soloBlock .solo > div:last-child{
-    overflow:auto;
   }
 
   /* =========== Sections wrapper =========== */

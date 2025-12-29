@@ -216,7 +216,33 @@
     width:100%;
     border-radius:0;
     overflow:hidden;
-    background:#111;
+    background:#fff;
+    display:flex;
+  }
+  .dev-text{
+    flex:0 0 30%;
+    display:flex;
+    align-items:center;
+    background:linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
+  }
+  .dev-text-inner{
+    position:relative;
+    z-index:1;
+    padding:0 48px;
+    max-width:520px;
+  }
+  .dev-media{
+    position:relative;
+    flex:1 1 70%;
+    overflow:hidden;
+  }
+  .dev-media::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 35%, rgba(255,255,255,0) 70%);
+    z-index:1;
+    pointer-events:none;
   }
   .dev-slide-img{
     width:100%;
@@ -226,28 +252,6 @@
     display:block;
     opacity:1;
     transition:opacity .6s ease;
-  }
-  .dev-overlay{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    pointer-events:none;
-  }
-  .dev-overlay::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 35%, rgba(255,255,255,0.0) 100%);
-  }
-  .dev-overlay-content{
-    position:relative;
-    z-index:1;
-    padding:0 64px;
-    width:30%;
-    min-width:280px;
-    max-width:520px;
-    pointer-events:auto;
   }
   .dev-kicker{
     font-size:11px;
@@ -296,6 +300,7 @@
     bottom:14px;
     display:flex;
     gap:8px;
+    z-index:2;
   }
   .dev-dot{
     width:7px; height:7px; border-radius:999px;
@@ -329,12 +334,12 @@
     .solo{ grid-template-columns: 1fr; }
     .media-stage{ height:auto; }
     .specs{ grid-template-columns: 1fr 1fr; }
-    .dev-overlay-content{ padding:0 32px; width:60%; }
+    .dev-text-inner{ padding:0 32px; }
     .dev-title{ font-size:26px; }
   }
   @media (max-width: 620px){
     .specs{ grid-template-columns: 1fr; }
-    .dev-overlay-content{ padding:0 22px; width:100%; max-width:100%; }
+    .dev-text-inner{ padding:0 22px; max-width:100%; }
     .dev-title{ font-size:22px; }
   }
 
@@ -443,9 +448,8 @@
     <!-- DEVELOPER DETAIL -->
     <div id="developerBlock" style="display:none; margin-top:0;">
       <div class="dev-slider" id="devSlider">
-        <img id="devSlideImg" class="dev-slide-img" src="" alt="">
-        <div class="dev-overlay">
-          <div class="dev-overlay-content">
+        <div class="dev-text">
+          <div class="dev-text-inner">
             <div class="dev-kicker">Developer project directory</div>
             <h3 class="dev-title">Original Art For Work</h3>
             <div class="dev-actions">
@@ -454,7 +458,10 @@
             </div>
           </div>
         </div>
-        <div class="dev-dots" id="devDots"></div>
+        <div class="dev-media">
+          <img id="devSlideImg" class="dev-slide-img" src="" alt="">
+          <div class="dev-dots" id="devDots"></div>
+        </div>
       </div>
     </div>
   </section>

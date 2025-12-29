@@ -648,6 +648,7 @@ function resetMapToSaudi(){
 /* =================== SECTION SWITCH =================== */
 let rrTimer = null;   // defined here so we can clear it
 let devTimer = null;
+let devCamTimer = null;
 
 window.switchSection = function(id, opts = {}){
   const { skipScroll = false } = opts;
@@ -669,6 +670,7 @@ window.switchSection = function(id, opts = {}){
   // stop image autoplay if running
   if(rrTimer){ clearInterval(rrTimer); rrTimer = null; }
   if(devTimer){ clearInterval(devTimer); devTimer = null; }
+  if(devCamTimer){ clearTimeout(devCamTimer); devCamTimer = null; }
 
   ["sect-home","sect-about","sect-gallery","sect-contact"].forEach(s=>{
     const node = document.getElementById(s);
@@ -925,8 +927,13 @@ function devShow(index){
   devUpdateDots();
 
   const loc = devLocations.length ? devLocations[devIndex % devLocations.length] : null;
+  if(devCamTimer){ clearTimeout(devCamTimer); devCamTimer = null; }
   if(loc){
-    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:16000 });
+    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:10000 });
+    devCamTimer = setTimeout(()=>{
+      const nextBearing = (map.getBearing ? map.getBearing() : 35) + 35;
+      map.easeTo({ center:loc, zoom:14.5, pitch:65, bearing:nextBearing, duration:6000 });
+    }, 10000);
   }
 }
 
@@ -976,6 +983,7 @@ function closeDeveloper(){
   if(developerBlock) developerBlock.style.display = 'none';
   document.body.classList.remove('is-developer');
   if(devTimer){ clearInterval(devTimer); devTimer = null; }
+  if(devCamTimer){ clearTimeout(devCamTimer); devCamTimer = null; }
   if(map && map.resize){
     requestAnimationFrame(()=> map.resize());
   }

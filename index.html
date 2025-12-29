@@ -26,7 +26,7 @@
   a{ color:inherit; text-decoration:none; }
 
   body.is-developer{
-    --map-height:65vh;
+    --map-height:60vh;
   }
 
   /* Make Mapbox attribution/logo small & subtle */
@@ -72,7 +72,11 @@
   }
 
   body.is-developer .shop-head{ display:none; }
-  body.is-developer #sect-gallery{ padding:0 24px 0; }
+  body.is-developer #sect-gallery{
+    width:100%;
+    margin:0;
+    padding:0;
+  }
 
   /* =========== Sections wrapper =========== */
   .page{
@@ -175,12 +179,12 @@
   .back-row{ margin-top:18px; }
   .link-back{ display:inline-flex; align-items:center; gap:8px; font-weight:800; color:#666; }
 
-  /* =========== DEVELOPER VIEW (map 65% + slider 35%) =========== */
+  /* =========== DEVELOPER VIEW (map 60% + slider 40%) =========== */
   #developerBlock{ display:none; margin-top:0; }
   body.is-developer #developerBlock{ display:block; }
   .dev-slider{
     position:relative;
-    height:35vh;
+    height:calc(100vh - var(--map-height));
     border-radius:24px;
     overflow:hidden;
     background:#111;
@@ -537,6 +541,9 @@ window.switchSection = function(id, opts = {}){
   document.body.classList.remove("is-solo");
   document.body.classList.remove("is-developer");
   setMapExtra(0);
+  if(map && map.resize){
+    requestAnimationFrame(()=> map.resize());
+  }
 
   // hide solo view and ALWAYS re-show the grid
   document.getElementById("soloBlock").style.display = "none";
@@ -821,6 +828,9 @@ function openDeveloper(p){
   if(developerBlock) developerBlock.style.display = 'block';
   document.body.classList.remove('is-solo');
   document.body.classList.add('is-developer');
+  if(map && map.resize){
+    requestAnimationFrame(()=> map.resize());
+  }
 
   devShow(0);
   devStart();
@@ -837,6 +847,9 @@ function closeDeveloper(){
   if(developerBlock) developerBlock.style.display = 'none';
   document.body.classList.remove('is-developer');
   if(devTimer){ clearInterval(devTimer); devTimer = null; }
+  if(map && map.resize){
+    requestAnimationFrame(()=> map.resize());
+  }
   document.getElementById('grid').style.display = 'grid';
 }
 

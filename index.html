@@ -25,6 +25,10 @@
   }
   a{ color:inherit; text-decoration:none; }
 
+  body.is-developer{
+    --map-height:65vh;
+  }
+
   /* Make Mapbox attribution/logo small & subtle */
   .mapboxgl-ctrl-bottom-left,
   .mapboxgl-ctrl-bottom-right{
@@ -66,6 +70,9 @@
     top:0;
     z-index:20;
   }
+
+  body.is-developer .shop-head{ display:none; }
+  body.is-developer #sect-gallery{ padding:0 24px 0; }
 
   /* =========== Sections wrapper =========== */
   .page{
@@ -167,6 +174,37 @@
 
   .back-row{ margin-top:18px; }
   .link-back{ display:inline-flex; align-items:center; gap:8px; font-weight:800; color:#666; }
+
+  /* =========== DEVELOPER VIEW (map 65% + slider 35%) =========== */
+  #developerBlock{ display:none; margin-top:0; }
+  body.is-developer #developerBlock{ display:block; }
+  .dev-slider{
+    position:relative;
+    height:35vh;
+    border-radius:24px;
+    overflow:hidden;
+    background:#111;
+  }
+  .dev-slide-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    opacity:1;
+    transition:opacity .6s ease;
+  }
+  .dev-dots{
+    position:absolute;
+    left:16px;
+    bottom:14px;
+    display:flex;
+    gap:8px;
+  }
+  .dev-dot{
+    width:7px; height:7px; border-radius:999px;
+    background:rgba(255,255,255,0.45);
+  }
+  .dev-dot.active{ background:#fff; }
 
   /* ======== 360 custom control (unchanged) ======== */
   .video360-shell{ height:100%; display:flex; flex-direction:column; }
@@ -300,6 +338,17 @@
         <a class="link-back" id="btnBack">← Back to Collection</a>
       </div>
     </div>
+
+    <!-- DEVELOPER DETAIL -->
+    <div id="developerBlock" style="display:none; margin-top:0;">
+      <div class="dev-slider" id="devSlider">
+        <img id="devSlideImg" class="dev-slide-img" src="" alt="">
+        <div class="dev-dots" id="devDots"></div>
+      </div>
+      <div class="back-row">
+        <a class="link-back" id="devBack">Back to Collection</a>
+      </div>
+    </div>
   </section>
 
   <!-- CONTACT -->
@@ -383,6 +432,22 @@ const DEVELOPER_IMAGES = [
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c51341a35e17f8bdf35f_marcus-ganahl-W5qgKZj-qnk-unsplash.jpg",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c512d5c33e3591853b44_stoica-ionela-CoNsEK5iHug-unsplash.jpg"
 ];
+const DEVELOPER_SLIDES = [
+  [DEVELOPER_IMAGES[0], DEVELOPER_IMAGES[1], DEVELOPER_IMAGES[2]],
+  [DEVELOPER_IMAGES[1], DEVELOPER_IMAGES[2], DEVELOPER_IMAGES[3]],
+  [DEVELOPER_IMAGES[2], DEVELOPER_IMAGES[3], DEVELOPER_IMAGES[4]],
+  [DEVELOPER_IMAGES[3], DEVELOPER_IMAGES[4], DEVELOPER_IMAGES[5]],
+  [DEVELOPER_IMAGES[4], DEVELOPER_IMAGES[5], DEVELOPER_IMAGES[0]],
+  [DEVELOPER_IMAGES[5], DEVELOPER_IMAGES[0], DEVELOPER_IMAGES[1]]
+];
+const DEVELOPER_LOCATIONS = [
+  [[2.3522, 48.8566], [55.2708, 25.2048], [139.6917, 35.6895]],
+  [[-74.0060, 40.7128], [-0.1276, 51.5072], [103.8198, 1.3521]],
+  [[151.2093, -33.8688], [-122.4194, 37.7749], [12.4964, 41.9028]],
+  [[28.9784, 41.0082], [-79.3832, 43.6532], [2.1734, 41.3851]],
+  [[121.4737, 31.2304], [18.4241, -33.9249], [-43.1729, -22.9068]],
+  [[126.9780, 37.5665], [-118.2437, 34.0522], [-99.1332, 19.4326]]
+];
 
 const baseCar = {
   category: "projects",
@@ -405,14 +470,17 @@ const baseCar = {
   }
 };
 
-function makeDeveloper(name, logo){
+function makeDeveloper(name, slides, locations){
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const cover = (slides && slides.length) ? slides[0] : '';
   return {
     id: `dev-${slug}`,
     name,
     category: "developers",
-    img: logo,
-    galleryImages: [logo],
+    img: cover,
+    galleryImages: slides,
+    devSlides: slides,
+    devLocations: locations,
     video: BASE_VIDEO,
     video360: BASE_VIDEO,
     model: baseCar.model,
@@ -434,12 +502,12 @@ const PROJECTS = Array.from({length:8}, (_,i)=>{
 });
 
 const DEVELOPERS = [
-  makeDeveloper("GitHub", DEVELOPER_IMAGES[0]),
-  makeDeveloper("GitLab", DEVELOPER_IMAGES[1]),
-  makeDeveloper("Vercel", DEVELOPER_IMAGES[2]),
-  makeDeveloper("Netlify", DEVELOPER_IMAGES[3]),
-  makeDeveloper("Figma", DEVELOPER_IMAGES[4]),
-  makeDeveloper("Stack Overflow", DEVELOPER_IMAGES[5])
+  makeDeveloper("GitHub", DEVELOPER_SLIDES[0], DEVELOPER_LOCATIONS[0]),
+  makeDeveloper("GitLab", DEVELOPER_SLIDES[1], DEVELOPER_LOCATIONS[1]),
+  makeDeveloper("Vercel", DEVELOPER_SLIDES[2], DEVELOPER_LOCATIONS[2]),
+  makeDeveloper("Netlify", DEVELOPER_SLIDES[3], DEVELOPER_LOCATIONS[3]),
+  makeDeveloper("Figma", DEVELOPER_SLIDES[4], DEVELOPER_LOCATIONS[4]),
+  makeDeveloper("Stack Overflow", DEVELOPER_SLIDES[5], DEVELOPER_LOCATIONS[5])
 ];
 
 const PRODUCTS = [...PROJECTS, ...DEVELOPERS];
@@ -461,20 +529,25 @@ function calcFilterBarHeight(){
 
 /* =================== SECTION SWITCH =================== */
 let rrTimer = null;   // defined here so we can clear it
+let devTimer = null;
 
 window.switchSection = function(id, opts = {}){
   const { skipScroll = false } = opts;
   // leave solo state if switching
   document.body.classList.remove("is-solo");
+  document.body.classList.remove("is-developer");
   setMapExtra(0);
 
   // hide solo view and ALWAYS re-show the grid
   document.getElementById("soloBlock").style.display = "none";
+  const devBlock = document.getElementById("developerBlock");
+  if(devBlock) devBlock.style.display = "none";
   const gridEl = document.getElementById("grid");
   if(gridEl) gridEl.style.display = "grid";
 
   // stop image autoplay if running
   if(rrTimer){ clearInterval(rrTimer); rrTimer = null; }
+  if(devTimer){ clearInterval(devTimer); devTimer = null; }
 
   ["sect-home","sect-about","sect-gallery","sect-contact"].forEach(s=>{
     const node = document.getElementById(s);
@@ -501,12 +574,19 @@ const grid = document.getElementById('grid');
 function card(p){
   const el = document.createElement('article');
   el.className = 'card';
+  const subLabel = p.category === 'developers' ? 'Developer' : 'Concept Car';
   el.innerHTML = `
     <div class="card-media"><img src="${p.img}" alt="${p.name}"></div>
     <div class="card-name">${p.name}</div>
-    <div class="card-sub">Concept Car</div>
+    <div class="card-sub">${subLabel}</div>
   `;
-  el.addEventListener('click', ()=> openSolo(p));
+  el.addEventListener('click', ()=>{
+    if(p.category === 'developers'){
+      openDeveloper(p);
+    }else{
+      openSolo(p);
+    }
+  });
   return el;
 }
 function render(list){
@@ -523,6 +603,8 @@ document.querySelector('.shop-head')?.addEventListener('click', e=>{
   btn.classList.add('active');
   const f = btn.dataset.filter;
   render( f==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.category===f) );
+  closeDeveloper();
+  grid.style.display = 'grid';
 });
 
 /* =================== SOLO VIEW (product) =================== */
@@ -531,6 +613,12 @@ const mediaStage = document.getElementById('mediaStage');
 let rrMode = 'images';
 let rrImages = [];
 let rrIndex  = 0;
+const developerBlock = document.getElementById('developerBlock');
+const devSlideImg = document.getElementById('devSlideImg');
+const devDots = document.getElementById('devDots');
+let devSlides = [];
+let devLocations = [];
+let devIndex = 0;
 
 function encodeURL(url){
   return (url||'').replace(/\(/g,'%28').replace(/\)/g,'%29').replace(/ /g,'%20');
@@ -623,6 +711,7 @@ function gotoStore(store){
 }
 
 function openSolo(p){
+  closeDeveloper();
   // fill text
   document.getElementById('soloTitle').textContent = p.name;
   document.getElementById('spMat').textContent     = p.specs.mat;
@@ -679,6 +768,76 @@ function closeSolo(){
     top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
     behavior:'smooth'
   });
+}
+
+/* =================== DEVELOPER VIEW =================== */
+function devUpdateDots(){
+  if(!devDots) return;
+  devDots.innerHTML = '';
+  devSlides.forEach((_, i)=>{
+    const dot = document.createElement('span');
+    dot.className = 'dev-dot' + (i===devIndex ? ' active' : '');
+    devDots.appendChild(dot);
+  });
+}
+
+function devShow(index){
+  if(!devSlides.length || !devSlideImg) return;
+  const max = devSlides.length;
+  devIndex = ((index%max)+max)%max;
+  const next = devSlides[devIndex];
+
+  devSlideImg.style.opacity = 0;
+  devSlideImg.onload = ()=>{ devSlideImg.style.opacity = 1; };
+  devSlideImg.src = next;
+  devSlideImg.alt = `Developer slide ${devIndex+1}`;
+  devUpdateDots();
+
+  const loc = devLocations[devIndex];
+  if(loc){
+    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:6000 });
+  }
+}
+
+function devStart(){
+  if(devTimer){ clearInterval(devTimer); }
+  devTimer = setInterval(()=> devShow(devIndex+1), 8000);
+}
+
+function openDeveloper(p){
+  // clear product autoplay
+  if(rrTimer){ clearInterval(rrTimer); rrTimer = null; }
+
+  // hide other views
+  soloBlock.style.display = 'none';
+  document.getElementById('grid').style.display = 'none';
+
+  devSlides = (p.devSlides && p.devSlides.length)
+    ? p.devSlides
+    : ((p.galleryImages && p.galleryImages.length) ? p.galleryImages : [p.img]);
+  devLocations = p.devLocations || [];
+  devIndex = 0;
+
+  if(developerBlock) developerBlock.style.display = 'block';
+  document.body.classList.remove('is-solo');
+  document.body.classList.add('is-developer');
+
+  devShow(0);
+  devStart();
+
+  window.scrollTo({
+    top: document.getElementById('map').offsetTop,
+    behavior:'smooth'
+  });
+
+  document.getElementById('devBack').onclick = closeDeveloper;
+}
+
+function closeDeveloper(){
+  if(developerBlock) developerBlock.style.display = 'none';
+  document.body.classList.remove('is-developer');
+  if(devTimer){ clearInterval(devTimer); devTimer = null; }
+  document.getElementById('grid').style.display = 'grid';
 }
 
 /* modal close */

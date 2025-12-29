@@ -12,7 +12,7 @@
     --accent:#333;
     --card-radius:32px;
     --btn-radius:30px;
-    --map-height:40vh;
+    --map-height:50vh;
     /* extra height the map receives when the filter bar is hidden in solo mode */
     --map-extra:0px;
   }
@@ -530,12 +530,11 @@ const COVER_IMAGES = [
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c029e929857a15f190_Gemini_Generated_Image_xfrvpjxfrvpjxfrv.png"
 ];
 const DEVELOPER_IMAGES = [
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c5141c8555865fc71646_moritz-mentges-5MlBMYDsGBY-unsplash.jpg",
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c514ac3d314e747ccdab_arno-senoner-zzduC8MxkJM-unsplash.jpg",
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c5131640a9016b2db325_viktor-forgacs-MGVLBuXS6Ic-unsplash.jpg",
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c513ae98181d0a06bd6d_rich-smith-lVVs5skyWoo-unsplash.jpg",
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c51341a35e17f8bdf35f_marcus-ganahl-W5qgKZj-qnk-unsplash.jpg",
-  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c512d5c33e3591853b44_stoica-ionela-CoNsEK5iHug-unsplash.jpg"
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c2b623daa6daaae7ce96_BNG%20(36)%20(1).png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c2b69244939dba62178d_1%20(2).png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c2b6c8d88b824f4c0ff5_BNG%20(40)%20(1).png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c2b680b22fc519275ead_BNG%20(41).png",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c2b6577cc8a4d124c2b4_BNG%20(38)%20(1).png"
 ];
 const DEV_TOWER_SLIDES = COVER_IMAGES;
 const DEVELOPER_LOCATIONS = [
@@ -543,8 +542,7 @@ const DEVELOPER_LOCATIONS = [
   [[-74.0060, 40.7128], [-0.1276, 51.5072], [103.8198, 1.3521]],
   [[151.2093, -33.8688], [-122.4194, 37.7749], [12.4964, 41.9028]],
   [[28.9784, 41.0082], [-79.3832, 43.6532], [2.1734, 41.3851]],
-  [[121.4737, 31.2304], [18.4241, -33.9249], [-43.1729, -22.9068]],
-  [[126.9780, 37.5665], [-118.2437, 34.0522], [-99.1332, 19.4326]]
+  [[121.4737, 31.2304], [18.4241, -33.9249], [-43.1729, -22.9068]]
 ];
 
 const baseCar = {
@@ -600,12 +598,11 @@ const PROJECTS = Array.from({length:8}, (_,i)=>{
 });
 
 const DEVELOPERS = [
-  makeDeveloper("GitHub", DEVELOPER_IMAGES[0], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[0]),
-  makeDeveloper("GitLab", DEVELOPER_IMAGES[1], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[1]),
-  makeDeveloper("Vercel", DEVELOPER_IMAGES[2], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[2]),
-  makeDeveloper("Netlify", DEVELOPER_IMAGES[3], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[3]),
-  makeDeveloper("Figma", DEVELOPER_IMAGES[4], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[4]),
-  makeDeveloper("Stack Overflow", DEVELOPER_IMAGES[5], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[5])
+  makeDeveloper("Developer 01", DEVELOPER_IMAGES[0], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[0]),
+  makeDeveloper("Developer 02", DEVELOPER_IMAGES[1], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[1]),
+  makeDeveloper("Developer 03", DEVELOPER_IMAGES[2], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[2]),
+  makeDeveloper("Developer 04", DEVELOPER_IMAGES[3], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[3]),
+  makeDeveloper("Developer 05", DEVELOPER_IMAGES[4], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[4])
 ];
 
 const PRODUCTS = [...PROJECTS, ...DEVELOPERS];
@@ -970,7 +967,6 @@ document.getElementById('artistModal').addEventListener('click', e=>{
 
 /* default section = Gallery */
 switchSection('sect-gallery', { skipScroll:true });
-openSolo(PROJECTS[0], { skipScroll:true });
 </script>
 </body>
 </html>

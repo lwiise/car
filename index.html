@@ -185,7 +185,8 @@
   .dev-slider{
     position:relative;
     height:calc(100vh - var(--map-height));
-    border-radius:24px;
+    width:100%;
+    border-radius:0;
     overflow:hidden;
     background:#111;
   }
@@ -197,6 +198,49 @@
     opacity:1;
     transition:opacity .6s ease;
   }
+  .dev-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+  }
+  .dev-overlay::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 36%, rgba(255,255,255,0.0) 70%);
+  }
+  .dev-overlay-content{
+    position:relative;
+    z-index:1;
+    padding:0 64px;
+    max-width:520px;
+  }
+  .dev-kicker{
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#6f6f6f;
+    margin-bottom:10px;
+  }
+  .dev-title{
+    margin:0 0 16px;
+    font-size:32px;
+    font-weight:900;
+    letter-spacing:-.02em;
+    color:#111;
+  }
+  .dev-cta{
+    border:none;
+    background:#e64a4a;
+    color:#fff;
+    font-weight:800;
+    border-radius:999px;
+    padding:12px 22px;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(230,74,74,0.35);
+  }
   .dev-dots{
     position:absolute;
     left:16px;
@@ -206,9 +250,9 @@
   }
   .dev-dot{
     width:7px; height:7px; border-radius:999px;
-    background:rgba(255,255,255,0.45);
+    background:rgba(0,0,0,0.35);
   }
-  .dev-dot.active{ background:#fff; }
+  .dev-dot.active{ background:#111; }
 
   /* ======== 360 custom control (unchanged) ======== */
   .video360-shell{ height:100%; display:flex; flex-direction:column; }
@@ -236,9 +280,13 @@
     .solo{ grid-template-columns: 1fr; }
     .media-stage{ height: 52vh; }
     .specs{ grid-template-columns: 1fr 1fr; }
+    .dev-overlay-content{ padding:0 32px; }
+    .dev-title{ font-size:26px; }
   }
   @media (max-width: 620px){
     .specs{ grid-template-columns: 1fr; }
+    .dev-overlay-content{ padding:0 22px; max-width:320px; }
+    .dev-title{ font-size:22px; }
   }
 
 </style>
@@ -347,6 +395,13 @@
     <div id="developerBlock" style="display:none; margin-top:0;">
       <div class="dev-slider" id="devSlider">
         <img id="devSlideImg" class="dev-slide-img" src="" alt="">
+        <div class="dev-overlay">
+          <div class="dev-overlay-content">
+            <div class="dev-kicker">Developer project directory</div>
+            <h3 class="dev-title">Original Art For Sale</h3>
+            <button class="dev-cta" type="button">Browse Collection</button>
+          </div>
+        </div>
         <div class="dev-dots" id="devDots"></div>
       </div>
       <div class="back-row">
@@ -436,14 +491,7 @@ const DEVELOPER_IMAGES = [
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c51341a35e17f8bdf35f_marcus-ganahl-W5qgKZj-qnk-unsplash.jpg",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c512d5c33e3591853b44_stoica-ionela-CoNsEK5iHug-unsplash.jpg"
 ];
-const DEVELOPER_SLIDES = [
-  [DEVELOPER_IMAGES[0], DEVELOPER_IMAGES[1], DEVELOPER_IMAGES[2]],
-  [DEVELOPER_IMAGES[1], DEVELOPER_IMAGES[2], DEVELOPER_IMAGES[3]],
-  [DEVELOPER_IMAGES[2], DEVELOPER_IMAGES[3], DEVELOPER_IMAGES[4]],
-  [DEVELOPER_IMAGES[3], DEVELOPER_IMAGES[4], DEVELOPER_IMAGES[5]],
-  [DEVELOPER_IMAGES[4], DEVELOPER_IMAGES[5], DEVELOPER_IMAGES[0]],
-  [DEVELOPER_IMAGES[5], DEVELOPER_IMAGES[0], DEVELOPER_IMAGES[1]]
-];
+const DEV_TOWER_SLIDES = COVER_IMAGES;
 const DEVELOPER_LOCATIONS = [
   [[2.3522, 48.8566], [55.2708, 25.2048], [139.6917, 35.6895]],
   [[-74.0060, 40.7128], [-0.1276, 51.5072], [103.8198, 1.3521]],
@@ -474,9 +522,9 @@ const baseCar = {
   }
 };
 
-function makeDeveloper(name, slides, locations){
+function makeDeveloper(name, cardImage, slides, locations){
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
-  const cover = (slides && slides.length) ? slides[0] : '';
+  const cover = cardImage || ((slides && slides.length) ? slides[0] : '');
   return {
     id: `dev-${slug}`,
     name,
@@ -506,12 +554,12 @@ const PROJECTS = Array.from({length:8}, (_,i)=>{
 });
 
 const DEVELOPERS = [
-  makeDeveloper("GitHub", DEVELOPER_SLIDES[0], DEVELOPER_LOCATIONS[0]),
-  makeDeveloper("GitLab", DEVELOPER_SLIDES[1], DEVELOPER_LOCATIONS[1]),
-  makeDeveloper("Vercel", DEVELOPER_SLIDES[2], DEVELOPER_LOCATIONS[2]),
-  makeDeveloper("Netlify", DEVELOPER_SLIDES[3], DEVELOPER_LOCATIONS[3]),
-  makeDeveloper("Figma", DEVELOPER_SLIDES[4], DEVELOPER_LOCATIONS[4]),
-  makeDeveloper("Stack Overflow", DEVELOPER_SLIDES[5], DEVELOPER_LOCATIONS[5])
+  makeDeveloper("GitHub", DEVELOPER_IMAGES[0], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[0]),
+  makeDeveloper("GitLab", DEVELOPER_IMAGES[1], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[1]),
+  makeDeveloper("Vercel", DEVELOPER_IMAGES[2], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[2]),
+  makeDeveloper("Netlify", DEVELOPER_IMAGES[3], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[3]),
+  makeDeveloper("Figma", DEVELOPER_IMAGES[4], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[4]),
+  makeDeveloper("Stack Overflow", DEVELOPER_IMAGES[5], DEV_TOWER_SLIDES, DEVELOPER_LOCATIONS[5])
 ];
 
 const PRODUCTS = [...PROJECTS, ...DEVELOPERS];
@@ -800,15 +848,15 @@ function devShow(index){
   devSlideImg.alt = `Developer slide ${devIndex+1}`;
   devUpdateDots();
 
-  const loc = devLocations[devIndex];
+  const loc = devLocations.length ? devLocations[devIndex % devLocations.length] : null;
   if(loc){
-    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:6000 });
+    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:12000 });
   }
 }
 
 function devStart(){
   if(devTimer){ clearInterval(devTimer); }
-  devTimer = setInterval(()=> devShow(devIndex+1), 8000);
+  devTimer = setInterval(()=> devShow(devIndex+1), 12000);
 }
 
 function openDeveloper(p){

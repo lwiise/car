@@ -811,7 +811,8 @@ function gotoStore(store){
   map.flyTo({ center:store.coords, zoom:16.2, pitch:65, bearing:45, duration:6000 });
 }
 
-function openSolo(p){
+function openSolo(p, opts = {}){
+  const { skipScroll = false } = opts;
   closeDeveloper();
   // fill text
   document.getElementById('soloTitle').textContent = p.name;
@@ -844,10 +845,12 @@ function openSolo(p){
   }
 
   // scroll so solo starts right under map
-  window.scrollTo({
-    top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
-    behavior:'smooth'
-  });
+  if(!skipScroll){
+    window.scrollTo({
+      top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+      behavior:'smooth'
+    });
+  }
 
   // wire buttons
   document.getElementById('btnClose').onclick = closeSolo;
@@ -967,6 +970,7 @@ document.getElementById('artistModal').addEventListener('click', e=>{
 
 /* default section = Gallery */
 switchSection('sect-gallery', { skipScroll:true });
+openSolo(PROJECTS[0], { skipScroll:true });
 </script>
 </body>
 </html>

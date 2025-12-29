@@ -122,8 +122,6 @@
     border-radius:18px; overflow:hidden; background:#fafafa;
   }
   .card-media img{ width:100%; height:100%; object-fit:cover; }
-  .card-logo .card-media{ background:#fff; padding:18px; }
-  .card-logo .card-media img{ object-fit:contain; }
   .card-name{ font-size:12px; font-weight:900; color:#919191; letter-spacing:.08em; text-transform:uppercase; }
   .card-sub{ font-size:10px; color:#c7c7c7; text-transform:uppercase; }
 
@@ -377,13 +375,13 @@ const COVER_IMAGES = [
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c1829b5e2731725a40_Gemini_Generated_Image_5bjix25bjix25bji.png",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c029e929857a15f190_Gemini_Generated_Image_xfrvpjxfrvpjxfrv.png"
 ];
-const DEVELOPER_LOGOS = [
-  "https://logo.clearbit.com/github.com",
-  "https://logo.clearbit.com/gitlab.com",
-  "https://logo.clearbit.com/vercel.com",
-  "https://logo.clearbit.com/netlify.com",
-  "https://logo.clearbit.com/figma.com",
-  "https://logo.clearbit.com/stackoverflow.com"
+const DEVELOPER_IMAGES = [
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c5141c8555865fc71646_moritz-mentges-5MlBMYDsGBY-unsplash.jpg",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c514ac3d314e747ccdab_arno-senoner-zzduC8MxkJM-unsplash.jpg",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c5131640a9016b2db325_viktor-forgacs-MGVLBuXS6Ic-unsplash.jpg",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c513ae98181d0a06bd6d_rich-smith-lVVs5skyWoo-unsplash.jpg",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c51341a35e17f8bdf35f_marcus-ganahl-W5qgKZj-qnk-unsplash.jpg",
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951c512d5c33e3591853b44_stoica-ionela-CoNsEK5iHug-unsplash.jpg"
 ];
 
 const baseCar = {
@@ -436,12 +434,12 @@ const PROJECTS = Array.from({length:8}, (_,i)=>{
 });
 
 const DEVELOPERS = [
-  makeDeveloper("GitHub", DEVELOPER_LOGOS[0]),
-  makeDeveloper("GitLab", DEVELOPER_LOGOS[1]),
-  makeDeveloper("Vercel", DEVELOPER_LOGOS[2]),
-  makeDeveloper("Netlify", DEVELOPER_LOGOS[3]),
-  makeDeveloper("Figma", DEVELOPER_LOGOS[4]),
-  makeDeveloper("Stack Overflow", DEVELOPER_LOGOS[5])
+  makeDeveloper("GitHub", DEVELOPER_IMAGES[0]),
+  makeDeveloper("GitLab", DEVELOPER_IMAGES[1]),
+  makeDeveloper("Vercel", DEVELOPER_IMAGES[2]),
+  makeDeveloper("Netlify", DEVELOPER_IMAGES[3]),
+  makeDeveloper("Figma", DEVELOPER_IMAGES[4]),
+  makeDeveloper("Stack Overflow", DEVELOPER_IMAGES[5])
 ];
 
 const PRODUCTS = [...PROJECTS, ...DEVELOPERS];
@@ -502,7 +500,7 @@ nav.querySelectorAll('.pill').forEach(pill=>{
 const grid = document.getElementById('grid');
 function card(p){
   const el = document.createElement('article');
-  el.className = p.category === 'developers' ? 'card card-logo' : 'card';
+  el.className = 'card';
   el.innerHTML = `
     <div class="card-media"><img src="${p.img}" alt="${p.name}"></div>
     <div class="card-name">${p.name}</div>

@@ -241,6 +241,22 @@
     cursor:pointer;
     box-shadow:0 10px 22px rgba(230,74,74,0.35);
   }
+  .dev-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .dev-back-btn{
+    border:1px solid #d9d9d9;
+    background:#fff;
+    color:#111;
+    font-weight:800;
+    border-radius:999px;
+    padding:12px 18px;
+    font-size:13px;
+    cursor:pointer;
+  }
   .dev-dots{
     position:absolute;
     left:16px;
@@ -399,7 +415,10 @@
           <div class="dev-overlay-content">
             <div class="dev-kicker">Developer project directory</div>
             <h3 class="dev-title">Original Art For Sale</h3>
-            <button class="dev-cta" type="button">Browse Collection</button>
+            <div class="dev-actions">
+              <button class="dev-cta" type="button">Browse Collection</button>
+              <button class="dev-back-btn" id="devBackBtn" type="button">Back to Collection</button>
+            </div>
           </div>
         </div>
         <div class="dev-dots" id="devDots"></div>
@@ -889,6 +908,8 @@ function openDeveloper(p){
   });
 
   document.getElementById('devBack').onclick = closeDeveloper;
+  const backBtn = document.getElementById('devBackBtn');
+  if(backBtn) backBtn.onclick = closeDeveloper;
 }
 
 function closeDeveloper(){

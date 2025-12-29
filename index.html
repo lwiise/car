@@ -26,7 +26,7 @@
   a{ color:inherit; text-decoration:none; }
 
   body.is-developer{
-    --map-height:60vh;
+    --map-height:50vh;
   }
 
   /* Make Mapbox attribution/logo small & subtle */
@@ -416,7 +416,7 @@
             <div class="dev-kicker">Developer project directory</div>
             <h3 class="dev-title">Original Art For Sale</h3>
             <div class="dev-actions">
-              <button class="dev-cta" type="button">Browse Collection</button>
+              <button class="dev-cta" id="devSeeMore" type="button">See More</button>
               <button class="dev-back-btn" id="devBackBtn" type="button">Back to Collection</button>
             </div>
           </div>
@@ -910,6 +910,10 @@ function openDeveloper(p){
   document.getElementById('devBack').onclick = closeDeveloper;
   const backBtn = document.getElementById('devBackBtn');
   if(backBtn) backBtn.onclick = closeDeveloper;
+  const seeMoreBtn = document.getElementById('devSeeMore');
+  if(seeMoreBtn){
+    seeMoreBtn.onclick = ()=> openSolo(PROJECTS[devIndex % PROJECTS.length]);
+  }
 }
 
 function closeDeveloper(){

@@ -94,10 +94,30 @@
     flex-direction:column;
   }
   body.is-solo .solo{
-    grid-template-columns:minmax(0,0.8fr) minmax(0,1.2fr);
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    padding:0;
   }
-  body.is-solo #soloBlock .solo{
-    flex:1;
+  body.is-solo #soloBlock .solo{ flex:1; }
+  body.is-solo .media-panels{
+    background:#fff;
+    color:#111;
+    border:1px solid #eee;
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.06);
+  }
+  body.is-solo .media-stage{ background:#fff; }
+  body.is-solo .solo-info{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.06);
   }
 
   /* =========== Sections wrapper =========== */
@@ -407,9 +427,7 @@
     <!-- Filter bar (will be hidden in solo via body.is-solo) -->
     <header class="shop-head">
       <div class="filter-row">
-        <button class="chip active" data-filter="all" id="chipAll">ALL</button>
-        <button class="chip" data-filter="developers">DEVELOPERS</button>
-        <button class="chip" data-filter="projects">PROJECTS</button>
+        <button class="chip active" data-filter="developers">DEVELOPERS</button>
       </div>
     </header>
 
@@ -431,7 +449,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div>
+        <div class="solo-info">
           <h2 class="solo-title" id="soloTitle">TOWER CONCEPT 01</h2>
           <p class="solo-sub">Contemporary automotive sculpture with a functional soul.</p>
 
@@ -607,11 +625,11 @@ const DEVELOPER_IMAGES = [
 ];
 const DEV_TOWER_SLIDES = COVER_IMAGES;
 const DEVELOPER_LOCATIONS = [
-  [[46.6753, 24.7136], [39.1925, 21.4858], [50.1033, 26.4207]],   // Riyadh, Jeddah, Dammam
-  [[39.8579, 21.3891], [39.5692, 24.5247], [50.2144, 26.2172]],   // Makkah, Medina, Al Khobar
-  [[42.5053, 18.2164], [40.4158, 21.4373], [36.5544, 28.3838]],   // Abha, Taif, Tabuk
-  [[38.0667, 24.0889], [49.6583, 27.0377], [41.6994, 27.5114]],   // Yanbu, Jubail, Hail
-  [[44.1277, 17.5659], [47.7220, 26.3139], [45.2806, 23.8859]]    // Najran, Al Hofuf, Saudi center
+  [[46.6753, 24.7136]],   // Riyadh, Saudi Arabia
+  [[46.6753, 24.7136]],
+  [[46.6753, 24.7136]],
+  [[46.6753, 24.7136]],
+  [[46.6753, 24.7136]]
 ];
 
 const baseCar = {
@@ -773,7 +791,7 @@ function render(list){
   grid.innerHTML = '';
   list.forEach(p=> grid.appendChild(card(p)));
 }
-render(PRODUCTS);
+render(DEVELOPERS);
 
 /* filters */
 document.querySelector('.shop-head')?.addEventListener('click', e=>{

@@ -303,6 +303,22 @@
     gap:8px;
     z-index:2;
   }
+  .dev-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:50%;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    font-size:24px;
+    cursor:pointer;
+    z-index:2;
+  }
+  .dev-prev{ left:12px; }
+  .dev-next{ right:12px; }
   .dev-dot{
     width:7px; height:7px; border-radius:999px;
     background:rgba(0,0,0,0.35);
@@ -461,6 +477,8 @@
         </div>
         <div class="dev-media">
           <img id="devSlideImg" class="dev-slide-img" src="" alt="">
+          <button class="dev-arrow dev-prev" id="devPrev" type="button">‹</button>
+          <button class="dev-arrow dev-next" id="devNext" type="button">›</button>
           <div class="dev-dots" id="devDots"></div>
         </div>
       </div>
@@ -506,6 +524,11 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiYW5hc2thcm90aSIsImEiOiJjbWhqcHgwcmMwbWM0MmxwZ2V
 const USER_STYLE  = "mapbox://styles/anaskaroti/cmhuiic1f00ft01qucn91gk6e";
 const DEFAULT_CENTER = [45.0792, 23.8859];
 const DEFAULT_ZOOM = 4.0;
+const DEV_ZOOM = 15.4;
+const DEV_PITCH = 70;
+const DEV_ZOOM_CLOSE = 16.2;
+const DEV_PITCH_CLOSE = 75;
+const DEV_BEARING = 35;
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const map = new mapboxgl.Map({
@@ -525,6 +548,40 @@ map.on('style.load', ()=>{
       'star-intensity':0.6
     });
   }catch(_){}
+  try{
+    map.setLight({
+      anchor:'viewport',
+      color:'white',
+      intensity:0.6,
+      position:[1.5, 210, 30]
+    });
+  }catch(_){}
+  try{
+    if(!map.getLayer('3d-buildings') && map.getSource('composite')){
+      const layers = map.getStyle().layers || [];
+      let labelLayerId = null;
+      for(const layer of layers){
+        if(layer.type === 'symbol' && layer.layout && layer.layout['text-field']){
+          labelLayerId = layer.id;
+          break;
+        }
+      }
+      map.addLayer({
+        id:'3d-buildings',
+        source:'composite',
+        'source-layer':'building',
+        filter:['==','extrude','true'],
+        type:'fill-extrusion',
+        minzoom:14,
+        paint:{
+          'fill-extrusion-color':'#e6e6e6',
+          'fill-extrusion-height':['get','height'],
+          'fill-extrusion-base':['get','min_height'],
+          'fill-extrusion-opacity':0.95
+        }
+      }, labelLayerId || undefined);
+    }
+  }catch(_){}
 });
 
 /* =================== DATA =================== */
@@ -533,6 +590,7 @@ const SPECIAL_360_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/ma
 const SPECIAL_NORMAL_VIDEO = "https://raw.githubusercontent.com/lwiise/3d-models/main/Untitled%20video%20-%20Made%20with%20Clipchamp%20(9).mp4";
 const SPECIAL_IMG = "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/69318e85e54ec217dd718990_ChatGPT%20Image%20Dec%203%2C%202025%2C%2005_23_33%20PM.png";
 const COVER_IMAGES = [
+  "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6953ac84be583b7269688910_Gemini_Generated_Image_8zigxk8zigxk8zig%20(1).png",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6952c81f19226e03541a50d6_WhatsApp%20Image%202025-12-29%20at%2017.09.52.jpeg",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c509850f48d7f8c54c_Gemini_Generated_Image_sqilmvsqilmvsqil.png",
   "https://cdn.prod.website-files.com/6915e045b3e3d5a1e709a05d/6951b9c535f4066b9e65d704_Gemini_Generated_Image_glh30cglh30cglh3.png",
@@ -740,6 +798,8 @@ let rrIndex  = 0;
 const developerBlock = document.getElementById('developerBlock');
 const devSlideImg = document.getElementById('devSlideImg');
 const devDots = document.getElementById('devDots');
+const devPrevBtn = document.getElementById('devPrev');
+const devNextBtn = document.getElementById('devNext');
 let devSlides = [];
 let devLocations = [];
 let devIndex = 0;
@@ -929,10 +989,10 @@ function devShow(index){
   const loc = devLocations.length ? devLocations[devIndex % devLocations.length] : null;
   if(devCamTimer){ clearTimeout(devCamTimer); devCamTimer = null; }
   if(loc){
-    map.flyTo({ center:loc, zoom:14.5, pitch:60, bearing:35, duration:10000 });
+    map.flyTo({ center:loc, zoom:DEV_ZOOM, pitch:DEV_PITCH, bearing:DEV_BEARING, duration:10000, essential:true });
     devCamTimer = setTimeout(()=>{
-      const nextBearing = (map.getBearing ? map.getBearing() : 35) + 35;
-      map.easeTo({ center:loc, zoom:14.5, pitch:65, bearing:nextBearing, duration:6000 });
+      const nextBearing = (map.getBearing ? map.getBearing() : DEV_BEARING) + 35;
+      map.easeTo({ center:loc, zoom:DEV_ZOOM_CLOSE, pitch:DEV_PITCH_CLOSE, bearing:nextBearing, duration:6000, essential:true });
     }, 10000);
   }
 }
@@ -976,6 +1036,18 @@ function openDeveloper(p){
   const seeMoreBtn = document.getElementById('devSeeMore');
   if(seeMoreBtn){
     seeMoreBtn.onclick = ()=> openSolo(PROJECTS[devIndex % PROJECTS.length]);
+  }
+  if(devPrevBtn){
+    devPrevBtn.onclick = ()=>{
+      devShow(devIndex-1);
+      devStart();
+    };
+  }
+  if(devNextBtn){
+    devNextBtn.onclick = ()=>{
+      devShow(devIndex+1);
+      devStart();
+    };
   }
 }
 

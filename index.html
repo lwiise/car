@@ -71,11 +71,11 @@
     filter:grayscale(1) contrast(1.08);
   }
 
-  /* Sticky map only in solo mode */
+  /* Map stays static in solo mode */
   body.is-solo #map{
-    position:sticky;
-    top:0;
-    z-index:20;
+    position:relative;
+    top:auto;
+    z-index:1;
   }
 
   body.is-developer .shop-head{ display:none; }
@@ -101,6 +101,7 @@
     border:none;
     box-shadow:none;
     padding:0;
+    width:100%;
   }
   body.is-solo #soloBlock .solo{ flex:1; }
   body.is-solo .media-panels{
@@ -110,6 +111,7 @@
     border-radius:24px;
     padding:20px;
     box-shadow:0 12px 28px rgba(0,0,0,0.06);
+    width:100%;
   }
   body.is-solo .media-stage{ background:#fff; }
   body.is-solo .solo-info{
@@ -118,6 +120,7 @@
     border-radius:24px;
     padding:24px;
     box-shadow:0 12px 28px rgba(0,0,0,0.06);
+    width:100%;
   }
 
   /* =========== Sections wrapper =========== */
@@ -474,6 +477,16 @@
             <button class="btn btn-light" id="btnClose">Close</button>
           </div>
         </div>
+
+        <div class="media-panels media-panels-dup">
+          <div class="mode-tabs">
+            <button class="mode-btn active" data-mode="images">Images</button>
+            <button class="mode-btn" data-mode="360">360</button>
+            <button class="mode-btn" data-mode="video">Video</button>
+            <button class="mode-btn" data-mode="3d">3D</button>
+          </div>
+          <div class="media-stage" id="mediaStageDup"></div>
+        </div>
       </div>
 
       <div class="back-row">
@@ -626,11 +639,11 @@ const DEVELOPER_IMAGES = [
 ];
 const DEV_TOWER_SLIDES = COVER_IMAGES;
 const DEVELOPER_LOCATIONS = [
-  [[46.6753, 24.7136]],   // Riyadh, Saudi Arabia
-  [[46.6753, 24.7136]],
-  [[46.6753, 24.7136]],
-  [[46.6753, 24.7136]],
-  [[46.6753, 24.7136]]
+  [[46.6753, 24.7136], [46.6346, 24.7617], [46.6139, 24.6780]],
+  [[46.6759, 24.7064], [46.7372, 24.6652], [46.5741, 24.7370]],
+  [[46.6986, 24.9576], [46.6559, 24.7725], [46.7102, 24.7588]],
+  [[46.7219, 24.6314], [46.7145, 24.6506], [46.6767, 24.5861]],
+  [[46.7596, 24.6908], [46.7647, 24.5936], [46.6749, 24.5980]]
 ];
 
 const baseCar = {
@@ -809,6 +822,7 @@ document.querySelector('.shop-head')?.addEventListener('click', e=>{
 /* =================== SOLO VIEW (product) =================== */
 const soloBlock  = document.getElementById('soloBlock');
 const mediaStage = document.getElementById('mediaStage');
+const mediaStageDup = document.getElementById('mediaStageDup');
 let rrMode = 'images';
 let rrImages = [];
 let rrIndex  = 0;
@@ -834,8 +848,15 @@ function rrGo(next){
   if(rrMode!=='images' || !rrImages.length) return;
   const max = rrImages.length;
   rrIndex = ((next%max)+max)%max;
-  const img = mediaStage.querySelector('img[data-rr]');
-  if(img) img.src = rrImages[rrIndex];
+  document.querySelectorAll('.media-stage img[data-rr]').forEach(img=>{
+    img.src = rrImages[rrIndex];
+  });
+}
+
+function setDuplicateImage(product){
+  if(!mediaStageDup) return;
+  const src = rrImages[rrIndex] || rrImages[0] || product.img;
+  mediaStageDup.innerHTML = `<img data-rr src="${src}" alt="${product.name}"/>`;
 }
 
 function setMode(mode, product){
@@ -849,6 +870,7 @@ function setMode(mode, product){
 
   if(mode==='images'){
     mediaStage.innerHTML = `<img data-rr src="${rrImages[0]}" alt="${product.name}"/>`;
+    setDuplicateImage(product);
     rrStart();
     return;
   }
@@ -859,6 +881,7 @@ function setMode(mode, product){
         <source src="${encodeURL(product.video)}" type="video/mp4">
       </video>
     `;
+    setDuplicateImage(product);
     return;
   }
 
@@ -883,6 +906,7 @@ function setMode(mode, product){
     b?.addEventListener('click', ()=>{ if(v.paused){ v.play().catch(()=>{});} else { v.pause(); } });
     v?.addEventListener('play', ()=> b.textContent='❚❚');
     v?.addEventListener('pause',()=> b.textContent='▶');
+    setDuplicateImage(product);
     return;
   }
 
@@ -893,6 +917,7 @@ function setMode(mode, product){
         style="width:100%;height:100%; background:#ffffff;" camera-orbit="45deg 75deg 3m" environment-image="neutral">
       </model-viewer>
     `;
+    setDuplicateImage(product);
   }
 }
 
@@ -944,10 +969,10 @@ function openSolo(p, opts = {}){
     requestAnimationFrame(()=> map.resize());
   }
 
-  // scroll so solo starts right under map
+  // scroll to show the map and the media card below
   if(!skipScroll){
     window.scrollTo({
-      top: document.getElementById('map').offsetTop + document.getElementById('map').offsetHeight,
+      top: document.getElementById('map').offsetTop,
       behavior:'smooth'
     });
   }
